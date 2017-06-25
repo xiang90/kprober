@@ -3,10 +3,14 @@ prober as a service
 
 ```go
 
-type Prober struct {
+type ProberSpec struct {
     Name string
     Target
     Probe
+}
+
+type ProberStatus struct {
+    PrometheusEndpoint string
 }
 
 // Only one of the field should be set.
