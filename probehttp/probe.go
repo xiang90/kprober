@@ -7,12 +7,13 @@ import (
 )
 
 type Probe struct {
+	Method   string
 	URL      string
 	Interval time.Duration
 
 	StatusCode int
 
-	State  int
+	state  int
 	Reason string
 }
 
@@ -26,7 +27,7 @@ func (p *Probe) Start(ctx context.Context) {
 
 		resp, err := http.Get(p.URL)
 		if err != nil {
-			p.State = -1
+			p.state = -1
 			p.Reason = err.Error()
 			continue
 		}
@@ -38,10 +39,14 @@ func (p *Probe) Start(ctx context.Context) {
 
 func (p *Probe) check(r *http.Response) {
 	if p.StatusCode != 0 && p.StatusCode != r.StatusCode {
-		p.State = -1
+		p.state = -1
 		p.Reason = "Status code mismatch"
 		return
 	}
 
 	// check more
+}
+
+func (p *Probe) State() int {
+	return p.state
 }

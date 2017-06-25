@@ -1,6 +1,6 @@
 package k8sutil
 
-func IPFromPod() string {
+func IPFromPod(podname string) string {
 	return ""
 }
 

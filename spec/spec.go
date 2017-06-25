@@ -19,6 +19,7 @@ type Probe struct {
 
 type HTTPProbe struct {
 	Method string // Only Get and Head are supported currently
+	Scheme string
 	Port   string
 	Path   string
 
