@@ -7,6 +7,7 @@ import (
 
 	"github.com/xiang90/kprober/k8sutil"
 	"github.com/xiang90/kprober/probehttp"
+	"github.com/xiang90/kprober/probeping"
 	"github.com/xiang90/kprober/reporting"
 	"github.com/xiang90/kprober/spec"
 )
@@ -42,6 +43,11 @@ func (p *Prober) Start(ctx context.Context) {
 		ph.Start(context.TODO())
 		probe = ph
 	case p.Ping != nil:
+		pp := &probeping.Probe{
+			Addr: ip,
+		}
+		pp.Start(context.TODO())
+		probe = pp
 	default:
 		panic("probe unspecified")
 	}

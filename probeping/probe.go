@@ -13,7 +13,7 @@ type Probe struct {
 
 	MaxLatency time.Duration
 
-	State  int
+	state  int
 	Reason string
 }
 
@@ -27,7 +27,7 @@ func (p *Probe) Start(ctx context.Context) {
 
 		pinger, err := ping.NewPinger(p.Addr)
 		if err != nil {
-			p.State = -1
+			p.state = -1
 			p.Reason = err.Error()
 			continue
 		}
@@ -40,10 +40,14 @@ func (p *Probe) Start(ctx context.Context) {
 
 func (p *Probe) check(s *ping.Statistics) {
 	if s.PacketLoss != 0 {
-		p.State = -1
+		p.state = -1
 		p.Reason = "ping packet lost"
 		return
 	}
 
 	// check more
+}
+
+func (p *Probe) State() int {
+	return p.state
 }
