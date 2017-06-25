@@ -16,3 +16,15 @@ func IPsFromReplicaSet() []string {
 func IPsFromDeployments() []string {
 	return nil
 }
+
+func DeployProber() error {
+
+}
+
+func UpdateProber() error {
+
+}
+
+func DeleteProber() error {
+
+}
