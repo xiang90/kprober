@@ -1,7 +1,7 @@
 package k8sutil
 
-func IPFromPod(podname string) string {
-	return ""
+func IPFromPod(ns, podname string) (string, error) {
+	return "", nil
 }
 
 func IPFromService() string {

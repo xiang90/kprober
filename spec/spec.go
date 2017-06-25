@@ -10,6 +10,8 @@ type ProbeSpec struct {
 
 // Only one of the field should be set.
 type Target struct {
+	Namespace string
+
 	Pod *string
 }
 

@@ -21,10 +21,17 @@ type Prober struct {
 }
 
 func (p *Prober) Start(ctx context.Context) {
-	var ip string
+	if p.Namespace == "" {
+		p.Namespace = "default"
+	}
+
+	var (
+		ip  string
+		err error
+	)
 	switch {
 	case p.Pod != nil:
-		k8sutil.IPFromPod(*p.Pod)
+		ip, err = k8sutil.IPFromPod(p.Namespace, *p.Pod)
 	default:
 		panic("target unspecified")
 	}
