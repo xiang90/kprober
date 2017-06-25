@@ -7,6 +7,10 @@ import (
 	"github.com/sparrc/go-ping"
 )
 
+var (
+	defaultPingInterval = time.Second
+)
+
 type Probe struct {
 	Addr     string
 	Interval time.Duration
@@ -18,6 +22,10 @@ type Probe struct {
 }
 
 func (p *Probe) Start(ctx context.Context) {
+	if p.Interval == 0 {
+		p.Interval = defaultPingInterval
+	}
+
 	for {
 		select {
 		case <-ctx.Done():

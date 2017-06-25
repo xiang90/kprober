@@ -37,14 +37,16 @@ func (p *Prober) Start(ctx context.Context) {
 	case p.HTTP != nil:
 		url := fmt.Sprintf("%s://%s:%s/%s", p.HTTP.Scheme, ip, p.HTTP.Port, p.HTTP.Path)
 		ph := &probehttp.Probe{
-			URL:    url,
-			Method: p.HTTP.Method,
+			URL:      url,
+			Method:   p.HTTP.Method,
+			Interval: p.HTTP.Interval,
 		}
 		ph.Start(context.TODO())
 		probe = ph
 	case p.Ping != nil:
 		pp := &probeping.Probe{
-			Addr: ip,
+			Addr:     ip,
+			Interval: p.HTTP.Interval,
 		}
 		pp.Start(context.TODO())
 		probe = pp

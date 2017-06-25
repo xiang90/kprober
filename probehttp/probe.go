@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+var (
+	defaultHTTPCheckInterval = time.Second
+)
+
 type Probe struct {
 	Method   string
 	URL      string
@@ -18,6 +22,10 @@ type Probe struct {
 }
 
 func (p *Probe) Start(ctx context.Context) {
+	if p.Interval == 0 {
+		p.Interval = defaultHTTPCheckInterval
+	}
+
 	for {
 		select {
 		case <-ctx.Done():

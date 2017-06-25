@@ -1,5 +1,7 @@
 package spec
 
+import "time"
+
 type ProbeSpec struct {
 	Name string
 	Target
@@ -23,9 +25,13 @@ type HTTPProbe struct {
 	Port   string
 	Path   string
 
+	Interval time.Duration
+
 	StatusRegex *string
 	BodyRegex   *string
 	LineMatch   *string
 }
 
-type PingProbe struct{}
+type PingProbe struct {
+	Interval time.Duration
+}
