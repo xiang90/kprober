@@ -1,6 +1,6 @@
 package spec
 
-type ProberSpec struct {
+type ProbeSpec struct {
 	Name string
 	Target
 	Probe
