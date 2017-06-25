@@ -36,6 +36,10 @@ type HTTPProbe struct {
     LineMatch *string
 }
 
+type ExecProbe struct {
+    Image string
+}
+
 type TCPProbe struct {
     StreamRegex *string
 }
