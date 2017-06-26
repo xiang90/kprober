@@ -46,8 +46,11 @@ func MustNewKubeClient() kubernetes.Interface {
 	return kubernetes.NewForConfigOrDie(cfg)
 }
 
-func MustNewKubeExtClient() kubernetes.Interface {
+func MustNewKubeExtClient() apiextensionsclient.Interface {
 	cfg, err := InClusterConfig()
+	if err != nil {
+		panic(err)
+	}
 	return apiextensionsclient.NewForConfigOrDie(cfg)
 }
 

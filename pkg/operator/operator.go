@@ -7,24 +7,25 @@ import (
 
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 )
 
 const (
-	groupName         = "mygroup.coreos.com"
+	crdGroupName      = "monitoring.coreos.com"
 	crdResourcePlural = "probers"
 	crdResourceKind   = "Prober"
 )
 
-var schemeGroupVersion = schema.GroupVersion{Group: groupName, Version: "v1alpha1"}
+var crdGroupVersion = schema.GroupVersion{Group: crdGroupName, Version: "v1alpha1"}
 
 type Probers struct {
 	kubecli    kubernetes.Interface
 	kubeExtCli apiextensionsclient.Interface
 }
 
-func New(kubecli kubernetes.Interface) *Probers {
+func New() *Probers {
 	return &Probers{
 		kubecli:    k8sutil.MustNewKubeClient(),
 		kubeExtCli: k8sutil.MustNewKubeExtClient(),
@@ -45,11 +46,11 @@ func (p *Probers) Start(ctx context.Context) {
 func (p *Probers) init(ctx context.Context) error {
 	crd := &apiextensionsv1beta1.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: crdName,
+			Name: crdResourcePlural + "." + crdGroupName,
 		},
 		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-			Group:   groupName,
-			Version: schemeGroupVersion.Version,
+			Group:   crdGroupName,
+			Version: crdGroupVersion.Version,
 			Scope:   apiextensionsv1beta1.NamespaceScoped,
 			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
 				Plural: crdResourcePlural,
