@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xiang90/kprober/k8sutil"
+	"github.com/xiang90/kprober/pkg/util/k8sutil"
 	"github.com/xiang90/kprober/probehttp"
 	"github.com/xiang90/kprober/probeping"
 	"github.com/xiang90/kprober/reporting"

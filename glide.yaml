@@ -1,0 +1,12 @@
+package: github.com/xiang90/kprober
+import:
+- package: k8s.io/apiextensions-apiserver
+  version: 5fa44608f6b9b2180a2fd1ecb52e651fd0397794
+- package: k8s.io/apimachinery
+  version: abe34e4f5b4413c282a83011892cbeea5b32223b
+- package: k8s.io/client-go
+  version: cc44961f935a644fb82c0f4b6591543704578db7
+- package: github.com/prometheus/client_golang
+  version: v0.8.0
+- package: github.com/sparrc/go-ping
+  version: 416e72114cd1edce2f287648f935a60dfe6cf40e
