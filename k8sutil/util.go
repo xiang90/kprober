@@ -18,13 +18,13 @@ func IPsFromDeployments() []string {
 }
 
 func DeployProber() error {
-
+	return nil
 }
 
 func UpdateProber() error {
-
+	return nil
 }
 
 func DeleteProber() error {
-
+	return nil
 }

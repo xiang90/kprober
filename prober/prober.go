@@ -32,6 +32,10 @@ func (p *Prober) Start(ctx context.Context) {
 	switch {
 	case p.Pod != nil:
 		ip, err = k8sutil.IPFromPod(p.Namespace, *p.Pod)
+		if err != nil {
+			// TODO: retry and report pod as unhealthy
+			panic(err)
+		}
 	default:
 		panic("target unspecified")
 	}
@@ -47,6 +51,8 @@ func (p *Prober) Start(ctx context.Context) {
 			URL:      url,
 			Method:   p.HTTP.Method,
 			Interval: p.HTTP.Interval,
+
+			StatusCode: p.HTTP.StatusCode,
 		}
 		ph.Start(context.TODO())
 		probe = ph

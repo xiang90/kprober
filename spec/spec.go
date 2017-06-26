@@ -29,6 +29,7 @@ type HTTPProbe struct {
 
 	Interval time.Duration
 
+	StatusCode  int
 	StatusRegex *string
 	BodyRegex   *string
 	LineMatch   *string
