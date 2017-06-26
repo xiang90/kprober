@@ -4,6 +4,7 @@ import (
 	"net"
 	"os"
 
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -43,6 +44,11 @@ func MustNewKubeClient() kubernetes.Interface {
 		panic(err)
 	}
 	return kubernetes.NewForConfigOrDie(cfg)
+}
+
+func MustNewKubeExtClient() kubernetes.Interface {
+	cfg, err := InClusterConfig()
+	return apiextensionsclient.NewForConfigOrDie(cfg)
 }
 
 func InClusterConfig() (*rest.Config, error) {
