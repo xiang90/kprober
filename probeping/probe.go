@@ -40,6 +40,8 @@ func (p *Probe) Start(ctx context.Context) {
 			continue
 		}
 
+		pinger.Timeout = time.Second
+
 		pinger.Count = 1
 		pinger.Run()
 		p.check(pinger.Statistics())

@@ -21,6 +21,8 @@ func NewPrometheus(proberName string) *PrometheusReporter {
 			Help:      "The state of the prober.",
 		})
 
+	prometheus.MustRegister(sg)
+
 	return &PrometheusReporter{
 		stateGauge: sg,
 	}

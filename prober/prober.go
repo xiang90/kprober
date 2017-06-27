@@ -36,6 +36,8 @@ func (p *Prober) Start(ctx context.Context) {
 			// TODO: retry and report pod as unhealthy
 			panic(err)
 		}
+	case p.IP != nil:
+		ip = *p.IP
 	default:
 		panic("target unspecified")
 	}
@@ -54,14 +56,14 @@ func (p *Prober) Start(ctx context.Context) {
 
 			StatusCode: p.HTTP.StatusCode,
 		}
-		ph.Start(context.TODO())
+		go ph.Start(context.TODO())
 		probe = ph
 	case p.Ping != nil:
 		pp := &probeping.Probe{
 			Addr:     ip,
-			Interval: p.HTTP.Interval,
+			Interval: p.Ping.Interval,
 		}
-		pp.Start(context.TODO())
+		go pp.Start(context.TODO())
 		probe = pp
 	default:
 		panic("probe unspecified")
