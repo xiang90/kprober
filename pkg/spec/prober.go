@@ -4,11 +4,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Prober struct {
+const (
+	ProberResourceKind   = "Prober"
+	ProberResourcePlural = "probers"
+)
+
+type ProberList struct {
 	metav1.TypeMeta `json:",inline"`
-	Metadata        metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec            ProberSpec        `json:"spec"`
-	Status          ProberStatus      `json:"status"`
+	metav1.ListMeta `json:"metadata"`
+	Items           []Prober `json:"items"`
+}
+
+type Prober struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              ProberSpec   `json:"spec"`
+	Status            ProberStatus `json:"status"`
 }
 
 type ProberSpec struct {
