@@ -17,7 +17,7 @@ import (
 
 const proberCRDName = spec.ProberResourcePlural + "." + spec.GroupName
 
-func CreateCustomResourceDefinition(clientset apiextensionsclient.Interface) error {
+func CreateProberCRD(clientset apiextensionsclient.Interface) error {
 	crd := &apiextensionsv1beta1.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: proberCRDName,
@@ -36,7 +36,7 @@ func CreateCustomResourceDefinition(clientset apiextensionsclient.Interface) err
 	return err
 }
 
-func WaitCRDEstablished(clientset apiextensionsclient.Interface) error {
+func WaitProberCRDCreated(clientset apiextensionsclient.Interface) error {
 	return wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
 		crd, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(proberCRDName, metav1.GetOptions{})
 		if err != nil {
