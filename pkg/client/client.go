@@ -1,6 +1,8 @@
 package client
 
 import (
+	"context"
+
 	"github.com/xiang90/kprober/pkg/spec"
 	"github.com/xiang90/kprober/pkg/util/k8sutil"
 
@@ -8,6 +10,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 )
+
+type ProbersCR interface {
+	Get(ctx context.Context, namespace, name string) (*spec.Prober, error)
+}
 
 func MustNewInCluster() (*rest.RESTClient, *runtime.Scheme) {
 	cfg, err := k8sutil.InClusterConfig()
