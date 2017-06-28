@@ -2,7 +2,9 @@ package operator
 
 import (
 	"context"
+	"os"
 
+	"github.com/xiang90/kprober/pkg/client"
 	"github.com/xiang90/kprober/pkg/util/k8sutil"
 
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -18,9 +20,12 @@ type Probers struct {
 }
 
 func New() *Probers {
+	probersCli, _ := client.MustNewInCluster()
 	return &Probers{
-		kubecli:    k8sutil.MustNewKubeClient(),
-		kubeExtCli: k8sutil.MustNewKubeExtClient(),
+		kubecli:       k8sutil.MustNewKubeClient(),
+		kubeExtCli:    k8sutil.MustNewKubeExtClient(),
+		probersClient: probersCli,
+		namespace:     os.Getenv("MY_POD_NAMESPACE"),
 	}
 }
 

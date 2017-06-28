@@ -33,6 +33,7 @@ func (p *Probers) run(ctx context.Context) {
 		})
 
 	go controller.Run(ctx.Done())
+	fmt.Println("start processing probers changes...")
 }
 
 func (p *Probers) onAdd(obj interface{}) {
@@ -43,7 +44,7 @@ func (p *Probers) onAdd(obj interface{}) {
 func (p *Probers) onUpdate(oldObj, newObj interface{}) {
 	oldProber := oldObj.(*spec.Prober)
 	newProber := newObj.(*spec.Prober)
-	fmt.Printf("Update: old: %v, new: %v", oldProber, newProber)
+	fmt.Printf("Update: old: %v, new: %v\n", oldProber, newProber)
 }
 
 func (p *Probers) onDelete(obj interface{}) {
