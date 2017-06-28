@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func NewClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
+func New(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
 	scheme := runtime.NewScheme()
 	if err := spec.AddToScheme(scheme); err != nil {
 		return nil, nil, err
