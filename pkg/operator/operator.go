@@ -33,5 +33,9 @@ func (p *Probers) Start(ctx context.Context) {
 }
 
 func (p *Probers) init(ctx context.Context) error {
-	return k8sutil.CreateCustomResourceDefinition(p.kubeExtCli)
+	err := k8sutil.CreateCustomResourceDefinition(p.kubeExtCli)
+	if err != nil {
+		return err
+	}
+	return k8sutil.WaitCRDEstablished(p.kubeExtCli)
 }

@@ -33,13 +33,12 @@ func CreateCustomResourceDefinition(clientset apiextensionsclient.Interface) err
 		},
 	}
 	_, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
-	if err != nil {
-		return err
-	}
+	return err
+}
 
-	// wait for CRD being established
-	err = wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
-		crd, err = clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(proberCRDName, metav1.GetOptions{})
+func WaitCRDEstablished(clientset apiextensionsclient.Interface) error {
+	return wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+		crd, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(proberCRDName, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}
@@ -58,5 +57,4 @@ func CreateCustomResourceDefinition(clientset apiextensionsclient.Interface) err
 		}
 		return false, nil
 	})
-	return err
 }
