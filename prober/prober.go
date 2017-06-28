@@ -13,7 +13,7 @@ import (
 )
 
 type Probe interface {
-	State() int
+	State() (reporting.State, string)
 }
 
 type Prober struct {

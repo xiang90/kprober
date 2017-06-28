@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/xiang90/kprober/reporting"
+
 	"github.com/sparrc/go-ping"
 )
 
@@ -17,8 +19,8 @@ type Probe struct {
 
 	MaxLatency time.Duration
 
-	state  int
-	Reason string
+	state  reporting.State
+	reason string
 }
 
 func (p *Probe) Start(ctx context.Context) {
@@ -35,8 +37,8 @@ func (p *Probe) Start(ctx context.Context) {
 
 		pinger, err := ping.NewPinger(p.Addr)
 		if err != nil {
-			p.state = -1
-			p.Reason = err.Error()
+			p.state = reporting.StateDown
+			p.reason = err.Error()
 			continue
 		}
 
@@ -50,14 +52,16 @@ func (p *Probe) Start(ctx context.Context) {
 
 func (p *Probe) check(s *ping.Statistics) {
 	if s.PacketLoss != 0 {
-		p.state = -1
-		p.Reason = "ping packet lost"
+		p.state = reporting.StateDown
+		p.reason = "ping packet lost"
 		return
 	}
+	p.state = reporting.StateHealthy
+	p.reason = ""
 
 	// check more
 }
 
-func (p *Probe) State() int {
-	return p.state
+func (p *Probe) State() (reporting.State, string) {
+	return p.state, p.reason
 }
