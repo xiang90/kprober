@@ -8,37 +8,30 @@ import (
 	"time"
 
 	"github.com/xiang90/kprober/prober"
-	"github.com/xiang90/kprober/spec"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
 	metricsListenAddr string
+	specFile          string
+	name              string
 )
 
 func init() {
 	flag.StringVar(&metricsListenAddr, "metrics-listen-addr", "0.0.0.0:17783", "listen address")
+	flag.StringVar(&specFile, "f", "spec.yaml", "prober spec file in yaml format")
+	flag.StringVar(&name, "n", "default-prober", "name of the prober")
 	flag.Parse()
 }
 
 func main() {
 
 	go func() {
-		googleAddr := "www.google.com"
 		p := prober.Prober{
-			ProbeSpec: spec.ProbeSpec{
-				Target: spec.Target{
-					IP: &googleAddr,
-				},
-				Probe: spec.Probe{
-					Ping: &spec.PingProbe{
-						Interval: 1 * time.Second,
-					},
-				},
-			},
+			Name:       name,
+			ProberSpec: defaultSpec,
 		}
-
 		p.Start(context.TODO())
 	}()
 

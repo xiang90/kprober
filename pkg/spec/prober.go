@@ -1,6 +1,8 @@
 package spec
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,7 +36,7 @@ type ProberStatus struct {
 type Target struct {
 	Namespace string
 	Pod       string
-	IP        *string
+	IP        string
 }
 
 // Only one of the field should be set.
@@ -49,7 +51,7 @@ type HTTPProbe struct {
 	Port   string
 	Path   string
 
-	IntervalInMS int
+	Interval time.Duration
 
 	StatusCode  int
 	StatusRegex string
@@ -58,5 +60,5 @@ type HTTPProbe struct {
 }
 
 type PingProbe struct {
-	IntervalInMS int
+	Interval time.Duration
 }

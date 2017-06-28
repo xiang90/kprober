@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/xiang90/kprober/pkg/spec"
 	"github.com/xiang90/kprober/pkg/util/k8sutil"
 	"github.com/xiang90/kprober/probehttp"
 	"github.com/xiang90/kprober/probeping"
 	"github.com/xiang90/kprober/reporting"
-	"github.com/xiang90/kprober/spec"
 )
 
 type Probe interface {
@@ -17,12 +17,16 @@ type Probe interface {
 }
 
 type Prober struct {
-	spec.ProbeSpec
+	Name string
+	spec.ProberSpec
 }
 
 func (p *Prober) Start(ctx context.Context) {
-	if p.Namespace == "" {
-		p.Namespace = "default"
+	ts := p.ProberSpec.Target
+	ps := p.ProberSpec.Probe
+
+	if ts.Namespace == "" {
+		ts.Namespace = "default"
 	}
 
 	var (
@@ -30,14 +34,14 @@ func (p *Prober) Start(ctx context.Context) {
 		err error
 	)
 	switch {
-	case p.Pod != nil:
-		ip, err = k8sutil.IPFromPod(p.Namespace, *p.Pod)
+	case ts.Pod != "":
+		ip, err = k8sutil.IPFromPod(ts.Namespace, ts.Pod)
 		if err != nil {
 			// TODO: retry and report pod as unhealthy
 			panic(err)
 		}
-	case p.IP != nil:
-		ip = *p.IP
+	case ts.IP != "":
+		ip = ts.IP
 	default:
 		panic("target unspecified")
 	}
@@ -47,21 +51,21 @@ func (p *Prober) Start(ctx context.Context) {
 	var probe Probe
 
 	switch {
-	case p.HTTP != nil:
-		url := fmt.Sprintf("%s://%s:%s/%s", p.HTTP.Scheme, ip, p.HTTP.Port, p.HTTP.Path)
+	case ps.HTTP != nil:
+		url := fmt.Sprintf("%s://%s:%s/%s", ps.HTTP.Scheme, ip, ps.HTTP.Port, ps.HTTP.Path)
 		ph := &probehttp.Probe{
 			URL:      url,
-			Method:   p.HTTP.Method,
-			Interval: p.HTTP.Interval,
+			Method:   ps.HTTP.Method,
+			Interval: ps.HTTP.Interval,
 
-			StatusCode: p.HTTP.StatusCode,
+			StatusCode: ps.HTTP.StatusCode,
 		}
 		go ph.Start(context.TODO())
 		probe = ph
-	case p.Ping != nil:
+	case ps.Ping != nil:
 		pp := &probeping.Probe{
 			Addr:     ip,
-			Interval: p.Ping.Interval,
+			Interval: ps.Ping.Interval,
 		}
 		go pp.Start(context.TODO())
 		probe = pp
