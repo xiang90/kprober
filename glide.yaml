@@ -1,7 +1,7 @@
 package: github.com/xiang90/kprober
 import:
 - package: k8s.io/apiextensions-apiserver
-  version: 5fa44608f6b9b2180a2fd1ecb52e651fd0397794
+  version: 3eb4c5fefbe7ad866747f78c7e4994cb555170c6
 - package: k8s.io/apimachinery
   version: abe34e4f5b4413c282a83011892cbeea5b32223b
 - package: k8s.io/client-go
