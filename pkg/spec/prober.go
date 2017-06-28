@@ -34,6 +34,7 @@ type ProberStatus struct {
 type Target struct {
 	Namespace string
 	Pod       string
+	IP        *string
 }
 
 // Only one of the field should be set.
