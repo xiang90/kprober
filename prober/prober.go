@@ -25,17 +25,14 @@ func (p *Prober) Start(ctx context.Context) {
 	ts := p.ProberSpec.Target
 	ps := p.ProberSpec.Probe
 
-	if ts.Namespace == "" {
-		ts.Namespace = "default"
-	}
-
 	var (
 		ip  string
 		err error
 	)
 	switch {
-	case ts.Pod != "":
-		ip, err = k8sutil.IPFromPod(ts.Namespace, ts.Pod)
+	case ts.Pod != nil:
+		pod := ts.Pod
+		ip, err = k8sutil.IPFromPod(pod.Namespace, pod.Name)
 		if err != nil {
 			// TODO: retry and report pod as unhealthy
 			panic(err)

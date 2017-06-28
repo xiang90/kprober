@@ -34,9 +34,33 @@ type ProberStatus struct {
 
 // Only one of the field should be set.
 type Target struct {
+	// Service IP, Pod IP or IP outside Kubernetes network
+	IP string
+
+	Pod        *PodTarget
+	Pods       *PodsTarget
+	Service    *ServiceTarget
+	Deployment *DeploymentTarget
+}
+
+type PodTarget struct {
 	Namespace string
-	Pod       string
-	IP        string
+	Name      string
+}
+
+type PodsTarget struct {
+	Namespace string
+	Selectors map[string]string
+}
+
+type DeploymentTarget struct {
+	Namespace string
+	Name      string
+}
+
+type ServiceTarget struct {
+	Namespace string
+	Name      string
 }
 
 // Only one of the field should be set.
