@@ -7,11 +7,14 @@ import (
 
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 type Probers struct {
-	kubecli    kubernetes.Interface
-	kubeExtCli apiextensionsclient.Interface
+	kubecli       kubernetes.Interface
+	kubeExtCli    apiextensionsclient.Interface
+	probersClient *rest.RESTClient
+	namespace     string
 }
 
 func New() *Probers {
@@ -23,13 +26,8 @@ func New() *Probers {
 
 func (p *Probers) Start(ctx context.Context) {
 	p.init(ctx)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		}
-	}
+	p.run(ctx)
+	<-ctx.Done()
 }
 
 func (p *Probers) init(ctx context.Context) error {
