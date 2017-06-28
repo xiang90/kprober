@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/xiang90/kprober/reporting"
 )
 
 var (
@@ -17,8 +19,8 @@ type Probe struct {
 
 	StatusCode int
 
-	state  int
-	Reason string
+	state  reporting.State
+	reason string
 }
 
 func (p *Probe) Start(ctx context.Context) {
@@ -35,8 +37,8 @@ func (p *Probe) Start(ctx context.Context) {
 
 		resp, err := http.Get(p.URL)
 		if err != nil {
-			p.state = -1
-			p.Reason = err.Error()
+			p.state = reporting.StateDown
+			p.reason = err.Error()
 			continue
 		}
 
@@ -47,14 +49,17 @@ func (p *Probe) Start(ctx context.Context) {
 
 func (p *Probe) check(r *http.Response) {
 	if p.StatusCode != 0 && p.StatusCode != r.StatusCode {
-		p.state = -1
-		p.Reason = "Status code mismatch"
+		p.state = reporting.StateDown
+		p.reason = "Status code mismatch"
 		return
 	}
 
 	// check more
+
+	p.state = reporting.StateHealthy
+	p.reason = ""
 }
 
-func (p *Probe) State() int {
-	return p.state
+func (p *Probe) State() (reporting.State, string) {
+	return p.state, p.reason
 }
