@@ -1,7 +1,7 @@
 package k8sutil
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/xiang90/kprober/pkg/spec"
@@ -51,7 +51,7 @@ func WaitProberCRDCreated(clientset apiextensionsclient.Interface) error {
 			case apiextensionsv1beta1.NamesAccepted:
 				if cond.Status == apiextensionsv1beta1.ConditionFalse {
 					// TODO: more formal logging
-					fmt.Printf("Name conflict: %v\n", cond.Reason)
+					log.Printf("Name conflict: %v", cond.Reason)
 				}
 			}
 		}

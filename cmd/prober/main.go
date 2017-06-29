@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -37,13 +36,13 @@ func main() {
 
 	crd, err := pc.Get(context.TODO(), namespace, name)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	if crd != nil {
-		fmt.Println("using prober spec from CRD")
+		log.Println("using prober spec from CRD")
 		spec = crd.Spec
 	} else {
-		fmt.Println("using default spec")
+		log.Println("using default spec")
 	}
 
 	go func() {
