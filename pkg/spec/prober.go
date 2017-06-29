@@ -85,4 +85,6 @@ type HTTPProbe struct {
 
 type PingProbe struct {
 	Interval time.Duration
+
+	Timeout time.Duration
 }

@@ -14,10 +14,10 @@ var (
 )
 
 type Probe struct {
-	Addr     string
-	Interval time.Duration
+	Addr string
 
-	MaxLatency time.Duration
+	Interval time.Duration
+	Timeout  time.Duration
 
 	state  reporting.State
 	reason string
@@ -42,7 +42,7 @@ func (p *Probe) Start(ctx context.Context) {
 			continue
 		}
 
-		pinger.Timeout = time.Second
+		pinger.Timeout = p.Timeout
 
 		pinger.Count = 1
 		pinger.Run()
