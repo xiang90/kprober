@@ -2,7 +2,7 @@ package operator
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/xiang90/kprober/pkg/spec"
 
@@ -33,21 +33,21 @@ func (p *Probers) run(ctx context.Context) {
 		})
 
 	go controller.Run(ctx.Done())
-	fmt.Println("start processing probers changes...")
+	log.Println("start processing probers changes...")
 }
 
 func (p *Probers) onAdd(obj interface{}) {
 	prober := obj.(*spec.Prober)
-	fmt.Printf("Add: %v\n", prober)
+	log.Printf("Add: %v", prober)
 }
 
 func (p *Probers) onUpdate(oldObj, newObj interface{}) {
 	oldProber := oldObj.(*spec.Prober)
 	newProber := newObj.(*spec.Prober)
-	fmt.Printf("Update: old: %v, new: %v\n", oldProber, newProber)
+	log.Printf("Update: old: %v, new: %v", oldProber, newProber)
 }
 
 func (p *Probers) onDelete(obj interface{}) {
 	prober := obj.(*spec.Prober)
-	fmt.Printf("Delete: %v\n", prober)
+	log.Printf("Delete: %v", prober)
 }
