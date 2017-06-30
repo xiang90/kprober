@@ -1,6 +1,8 @@
 package reporting
 
 import (
+	"strings"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -27,7 +29,7 @@ func NewPrometheus(proberName string) *PrometheusReporter {
 	sg := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: "kprober",
-			Subsystem: proberName,
+			Subsystem: strings.Replace(proberName, "-", "_", -1),
 			Name:      "state",
 			Help:      "The state of the prober.",
 		},
