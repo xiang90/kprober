@@ -9,23 +9,21 @@ import (
 
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 type Probers struct {
-	kubecli       kubernetes.Interface
-	kubeExtCli    apiextensionsclient.Interface
-	probersClient *rest.RESTClient
-	namespace     string
+	kubecli    kubernetes.Interface
+	kubeExtCli apiextensionsclient.Interface
+	probersCli client.ProbersCR
+	namespace  string
 }
 
 func New() *Probers {
-	probersCli, _ := client.MustNewInCluster()
 	return &Probers{
-		kubecli:       k8sutil.MustNewKubeClient(),
-		kubeExtCli:    k8sutil.MustNewKubeExtClient(),
-		probersClient: probersCli,
-		namespace:     os.Getenv("MY_POD_NAMESPACE"),
+		kubecli:    k8sutil.MustNewKubeClient(),
+		kubeExtCli: k8sutil.MustNewKubeExtClient(),
+		probersCli: client.MustNewInCluster(),
+		namespace:  os.Getenv("MY_POD_NAMESPACE"),
 	}
 }
 

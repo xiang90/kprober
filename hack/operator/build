@@ -17,6 +17,7 @@ function go_build {
 }
 
 go_build prober-operator
+go_build prober
 
 docker build --tag "${IMAGE}" -f ./hack/operator/Dockerfile . 1>/dev/null
 docker push "${IMAGE}" 1>/dev/null
