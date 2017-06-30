@@ -22,7 +22,7 @@ var (
 
 func init() {
 	flag.StringVar(&metricsListenAddr, "metrics-listen-addr", "0.0.0.0:17783", "listen address")
-	flag.StringVar(&name, "n", "default_prober", "name of the prober")
+	flag.StringVar(&name, "n", "default-prober", "name of the prober")
 	flag.StringVar(&namespace, "ns", "default", "namespace of the prober")
 
 	flag.Parse()
