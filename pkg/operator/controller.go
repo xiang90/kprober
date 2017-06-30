@@ -12,7 +12,7 @@ import (
 
 func (p *Probers) run(ctx context.Context) {
 	source := cache.NewListWatchFromClient(
-		p.probersClient,
+		p.probersCli.RESTClient(),
 		spec.ProberResourcePlural,
 		p.namespace,
 		fields.Everything())

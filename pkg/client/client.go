@@ -13,23 +13,52 @@ import (
 
 type ProbersCR interface {
 	Get(ctx context.Context, namespace, name string) (*spec.Prober, error)
+	RESTClient() *rest.RESTClient
 }
 
-func MustNewInCluster() (*rest.RESTClient, *runtime.Scheme) {
+type probersClient struct {
+	restCli    *rest.RESTClient
+	crScheme   *runtime.Scheme
+	paramCodec runtime.ParameterCodec
+}
+
+func (pc *probersClient) RESTClient() *rest.RESTClient {
+	return pc.restCli
+}
+
+func (pc *probersClient) Get(ctx context.Context, ns, name string) (*spec.Prober, error) {
+	res := &spec.Prober{}
+	err := pc.restCli.Get().
+		Namespace(ns).
+		Resource(spec.ProberResourcePlural).
+		Name(name).
+		Do().
+		Into(res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func MustNewInCluster() ProbersCR {
 	cfg, err := k8sutil.InClusterConfig()
 	if err != nil {
 		panic(err)
 	}
-	cli, scheme, err := New(cfg)
+	cli, crScheme, err := New(cfg)
 	if err != nil {
 		panic(err)
 	}
-	return cli, scheme
+	return &probersClient{
+		restCli:    cli,
+		crScheme:   crScheme,
+		paramCodec: runtime.NewParameterCodec(crScheme),
+	}
 }
 
 func New(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
-	scheme := runtime.NewScheme()
-	if err := spec.AddToScheme(scheme); err != nil {
+	crScheme := runtime.NewScheme()
+	if err := spec.AddToScheme(crScheme); err != nil {
 		return nil, nil, err
 	}
 
@@ -37,12 +66,12 @@ func New(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
 	config.GroupVersion = &spec.SchemeGroupVersion
 	config.APIPath = "/apis"
 	config.ContentType = runtime.ContentTypeJSON
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: serializer.NewCodecFactory(scheme)}
+	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: serializer.NewCodecFactory(crScheme)}
 
 	client, err := rest.RESTClientFor(&config)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return client, scheme, nil
+	return client, crScheme, nil
 }

@@ -22,25 +22,24 @@ var (
 
 func init() {
 	flag.StringVar(&metricsListenAddr, "metrics-listen-addr", "0.0.0.0:17783", "listen address")
-	flag.StringVar(&name, "n", "default-prober", "name of the prober")
+	flag.StringVar(&name, "n", "default_prober", "name of the prober")
 	flag.StringVar(&namespace, "ns", "default", "namespace of the prober")
 
 	flag.Parse()
 }
 
 func main() {
-	spec := defaultSpec
+	pc := client.MustNewInCluster()
 
-	// todo: init client
-	var pc client.ProbersCR
-
-	crd, err := pc.Get(context.TODO(), namespace, name)
+	cr, err := pc.Get(context.TODO(), namespace, name)
 	if err != nil {
 		log.Println(err)
 	}
-	if crd != nil {
-		log.Println("using prober spec from CRD")
-		spec = crd.Spec
+
+	spec := defaultSpec
+	if cr != nil {
+		log.Println("using prober spec from prober CR")
+		spec = cr.Spec
 	} else {
 		log.Println("using default spec")
 	}
