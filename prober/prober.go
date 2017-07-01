@@ -59,7 +59,7 @@ func (p *Prober) Start(ctx context.Context) {
 	case ps.Ping != nil:
 		pp := &probeping.Probe{
 			Addr:     ip,
-			Interval: ps.Ping.Interval,
+			Interval: time.Duration(ps.Ping.PeriodSeconds) * time.Second,
 		}
 		go pp.Start(context.TODO())
 		probe = pp

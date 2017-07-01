@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/xiang90/kprober/pkg/spec"
 )
 
@@ -12,8 +10,8 @@ var defaultSpec = spec.ProberSpec{
 	},
 	Probe: spec.Probe{
 		Ping: &spec.PingProbe{
-			Interval: 1 * time.Second,
-			Timeout:  1 * time.Second,
+			PeriodSeconds:  1,
+			TimeoutSeconds: 1,
 		},
 	},
 }

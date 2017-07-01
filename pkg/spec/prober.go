@@ -19,14 +19,14 @@ type ProberList struct {
 
 type Prober struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.ObjectMeta `json:"metadata"`
 	Spec              ProberSpec   `json:"spec"`
 	Status            ProberStatus `json:"status"`
 }
 
 type ProberSpec struct {
-	Target Target
-	Probe  Probe
+	Target Target `json:"target"`
+	Probe  Probe  `json:"probe"`
 }
 
 type ProberStatus struct {
@@ -35,7 +35,7 @@ type ProberStatus struct {
 // Only one of the field should be set.
 type Target struct {
 	// Service IP, Pod IP or IP outside Kubernetes network
-	IP      string
+	IP      string `json:"ip,omitempty"`
 	Service *ServiceTarget
 }
 
@@ -46,8 +46,8 @@ type ServiceTarget struct {
 
 // Only one of the field should be set.
 type Probe struct {
-	HTTP *HTTPProbe
-	Ping *PingProbe
+	HTTP *HTTPProbe `json:"http,omitempty"`
+	Ping *PingProbe `json:"ping,omitempty"`
 }
 
 type HTTPProbe struct {
@@ -65,7 +65,6 @@ type HTTPProbe struct {
 }
 
 type PingProbe struct {
-	Interval time.Duration
-
-	Timeout time.Duration
+	PeriodSeconds  int64 `json:"periodSeconds,omitempty"`
+	TimeoutSeconds int64 `json:"timeoutSeconds,omitempty"`
 }

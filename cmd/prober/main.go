@@ -33,7 +33,7 @@ func main() {
 
 	cr, err := pc.Get(context.TODO(), namespace, name)
 	if err != nil {
-		log.Println(err)
+		log.Printf("prober Get fail: %v", err)
 	}
 
 	spec := defaultSpec

@@ -13,8 +13,8 @@ func IPFromPod(ns, podname string) (string, error) {
 	return "", nil
 }
 
-func IPFromService() string {
-	return ""
+func IPFromService(ns, svcName string) (string, error) {
+	return "", nil
 }
 
 func IPsFromReplicaSet() []string {
