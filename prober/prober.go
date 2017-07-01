@@ -30,9 +30,9 @@ func (p *Prober) Start(ctx context.Context) {
 		err error
 	)
 	switch {
-	case ts.Pod != nil:
-		pod := ts.Pod
-		ip, err = k8sutil.IPFromPod(pod.Namespace, pod.Name)
+	case ts.Service != nil:
+		srv := ts.Service
+		ip, err = k8sutil.IPFromService(srv.Namespace, srv.Name)
 		if err != nil {
 			// TODO: retry and report pod as unhealthy
 			panic(err)
