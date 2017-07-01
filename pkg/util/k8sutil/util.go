@@ -5,6 +5,7 @@ import (
 	"os"
 
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -13,8 +14,12 @@ func IPFromPod(ns, podname string) (string, error) {
 	return "", nil
 }
 
-func IPFromService(ns, svcName string) (string, error) {
-	return "", nil
+func IPFromService(kubecli kubernetes.Interface, ns, svcName string) (string, error) {
+	svc, err := kubecli.CoreV1().Services(ns).Get(svcName, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	return svc.Spec.ClusterIP, nil
 }
 
 func IPsFromReplicaSet() []string {

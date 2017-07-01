@@ -22,8 +22,8 @@ type Prober struct {
 }
 
 func (p *Prober) Start(ctx context.Context) {
-	ts := p.ProberSpec.Target
-	ps := p.ProberSpec.Probe
+	ts, ps := p.ProberSpec.Target, p.ProberSpec.Probe
+	kubecli := k8sutil.MustNewKubeClient()
 
 	var (
 		ip  string
@@ -32,7 +32,7 @@ func (p *Prober) Start(ctx context.Context) {
 	switch {
 	case ts.Service != nil:
 		srv := ts.Service
-		ip, err = k8sutil.IPFromService(srv.Namespace, srv.Name)
+		ip, err = k8sutil.IPFromService(kubecli, srv.Namespace, srv.Name)
 		if err != nil {
 			// TODO: retry and report pod as unhealthy
 			panic(err)
