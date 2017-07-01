@@ -11,6 +11,7 @@ import (
 
 var (
 	defaultPingInterval = time.Second
+	defaultPingTimeout  = time.Second
 )
 
 type Probe struct {
@@ -26,6 +27,9 @@ type Probe struct {
 func (p *Probe) Start(ctx context.Context) {
 	if p.Interval == 0 {
 		p.Interval = defaultPingInterval
+	}
+	if p.Timeout == 0 {
+		p.Timeout = defaultPingTimeout
 	}
 
 	for {
