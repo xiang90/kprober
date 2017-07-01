@@ -40,12 +40,12 @@ func (p *Probe) Start(ctx context.Context) {
 		}
 
 		pinger, err := ping.NewPinger(p.Addr)
-		pinger.SetPrivileged(true)
 		if err != nil {
 			p.state = reporting.StateDown
 			p.reason = err.Error()
 			continue
 		}
+		pinger.SetPrivileged(true)
 
 		pinger.Timeout = p.Timeout
 
