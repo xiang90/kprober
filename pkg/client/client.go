@@ -29,8 +29,8 @@ func (pc *probersClient) RESTClient() *rest.RESTClient {
 func (pc *probersClient) Get(ctx context.Context, ns, name string) (*spec.Prober, error) {
 	res := &spec.Prober{}
 	err := pc.restCli.Get().
-		Namespace(ns).
 		Resource(spec.ProberResourcePlural).
+		Namespace(ns).
 		Name(name).
 		Do().
 		Into(res)
