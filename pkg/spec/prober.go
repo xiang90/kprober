@@ -77,10 +77,10 @@ type HTTPProbe struct {
 
 	Interval time.Duration
 
-	StatusCode  int
-	StatusRegex string
-	BodyRegex   string
-	LineMatch   string
+	StatusCode int
+
+	BodyMatchesRegexp      []string
+	BodyDoesNotMatchRegexp []string
 }
 
 type PingProbe struct {
