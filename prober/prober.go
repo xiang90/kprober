@@ -51,11 +51,8 @@ func (p *Prober) Start(ctx context.Context) {
 	case ps.HTTP != nil:
 		url := fmt.Sprintf("%s://%s:%s/%s", ps.HTTP.Scheme, ip, ps.HTTP.Port, ps.HTTP.Path)
 		ph := &probehttp.Probe{
-			URL:      url,
-			Method:   ps.HTTP.Method,
-			Interval: ps.HTTP.Interval,
-
-			StatusCode: ps.HTTP.StatusCode,
+			URL:       url,
+			HTTPProbe: ps.HTTP,
 		}
 		go ph.Start(context.TODO())
 		probe = ph
