@@ -71,3 +71,17 @@ type PingProbe struct {
 	PeriodSeconds  int64 `json:"periodSeconds,omitempty"`
 	TimeoutSeconds int64 `json:"timeoutSeconds,omitempty"`
 }
+
+// ContainerProbe specifies a container that can probe.
+//
+// The container MUST can execute command `probe`.
+// It MUST write the probe result to stdout in the format `state result\n`.
+// state MUST be an integer and reason must be a human-readable string.
+//
+// The container SHOULD accept environment variable IP, which contains the
+// IP address (which is generated from target spec by the operator) it should probe.
+// The container MAY accept environment variable Target, which contains the JSON
+// format of the target spec it should probe.
+type ContainerProbe struct {
+	Image string `json:"image,omitempty"`
+}
