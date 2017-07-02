@@ -25,6 +25,8 @@ type Probe struct {
 }
 
 func (p *Probe) Start(ctx context.Context) {
+	c := &http.Client{}
+
 	if p.Interval == 0 {
 		p.Interval = defaultHTTPCheckInterval
 	}
@@ -36,7 +38,16 @@ func (p *Probe) Start(ctx context.Context) {
 		case <-time.After(p.Interval):
 		}
 
-		resp, err := http.Get(p.URL)
+		cctx, cancel := context.WithTimeout(ctx, time.Duration(p.TimeoutSeconds)*time.Second)
+		// todo: support body
+		r, err := http.NewRequest(p.Method, p.URL, nil)
+		if err != nil {
+			panic("cannot create http request")
+		}
+		r.WithContext(cctx)
+
+		resp, err := c.Do(r)
+		cancel()
 		if err != nil {
 			p.state = reporting.StateDown
 			p.reason = err.Error()
