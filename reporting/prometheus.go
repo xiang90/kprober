@@ -7,6 +7,8 @@ import (
 )
 
 const (
+	// Probe failure
+	StateUnknown = State(-2)
 	// Not reachable
 	StateDown = State(-1)
 	// Everything is OK
