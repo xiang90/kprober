@@ -59,6 +59,8 @@ type HTTPProbe struct {
 
 	Interval time.Duration
 
+	TimeoutSeconds int64 `json:"timeoutSeconds,omitempty"`
+
 	StatusCode int `json:"statusCode"`
 
 	BodyMatchesRegexp      []string
