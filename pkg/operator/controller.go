@@ -45,10 +45,12 @@ func (p *Probers) run(ctx context.Context) {
 func (p *Probers) onAdd(obj interface{}) {
 	pr := obj.(*spec.Prober)
 
+	podSelector := map[string]string{"app": "prober", "prober": pr.Name}
+
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   pr.Name,
-			Labels: map[string]string{"app": "prober", "prober": pr.Name},
+			Labels: podSelector,
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{{
@@ -57,7 +59,7 @@ func (p *Probers) onAdd(obj interface{}) {
 				Command: []string{
 					"prober",
 					"-n=" + pr.Name,
-					"-ns=" + p.namespace,
+					"-ns=" + pr.Namespace,
 				},
 			}},
 		},
@@ -69,7 +71,7 @@ func (p *Probers) onAdd(obj interface{}) {
 			Labels: map[string]string{"prober": pr.Name},
 		},
 		Spec: appsv1beta1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "prober", "prober": pr.Name}},
+			Selector: &metav1.LabelSelector{MatchLabels: podSelector},
 			Template: podTempl,
 			Strategy: appsv1beta1.DeploymentStrategy{
 				Type: appsv1beta1.RecreateDeploymentStrategyType,
