@@ -51,14 +51,15 @@ type Probe struct {
 }
 
 type HTTPProbe struct {
-	Method string // Only Get and Head are supported currently
-	Scheme string
-	Port   string
-	Path   string
+	// Only Get and Head are supported currently
+	Method string `json:"method"`
+	Scheme string `json:"scheme"`
+	Port   int    `json:"port"`
+	Path   string `json:"path"`
 
 	Interval time.Duration
 
-	StatusCode int
+	StatusCode int `json:"statusCode"`
 
 	BodyMatchesRegexp      []string
 	BodyDoesNotMatchRegexp []string
