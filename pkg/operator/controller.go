@@ -45,12 +45,12 @@ func (p *Probers) run(ctx context.Context) {
 func (p *Probers) onAdd(obj interface{}) {
 	pr := obj.(*spec.Prober)
 
-	podSelector := map[string]string{"app": "prober", "prober": pr.Name}
+	selector := map[string]string{"app": "prober", "prober": pr.Name}
 
 	podTempl := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   pr.Name,
-			Labels: podSelector,
+			Labels: selector,
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{{
@@ -71,14 +71,34 @@ func (p *Probers) onAdd(obj interface{}) {
 			Labels: map[string]string{"prober": pr.Name},
 		},
 		Spec: appsv1beta1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{MatchLabels: podSelector},
+			Selector: &metav1.LabelSelector{MatchLabels: selector},
 			Template: podTempl,
 			Strategy: appsv1beta1.DeploymentStrategy{
 				Type: appsv1beta1.RecreateDeploymentStrategyType,
 			},
 		},
 	}
-	_, err := p.kubecli.AppsV1beta1().Deployments(p.namespace).Create(d)
+	_, err := p.kubecli.AppsV1beta1().Deployments(pr.Namespace).Create(d)
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		// TODO: retry or report failure status in CR
+		panic(err)
+	}
+
+	svc := &v1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   pr.Name,
+			Labels: selector,
+		},
+		Spec: v1.ServiceSpec{
+			Selector: selector,
+			Ports: []v1.ServicePort{{
+				Name: "metrics",
+				Port: 17783,
+			}},
+		},
+	}
+
+	_, err = p.kubecli.CoreV1().Services(pr.Namespace).Create(svc)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		// TODO: retry or report failure status in CR
 		panic(err)
