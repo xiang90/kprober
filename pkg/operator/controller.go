@@ -112,6 +112,25 @@ func (p *Probers) onUpdate(oldObj, newObj interface{}) {
 }
 
 func (p *Probers) onDelete(obj interface{}) {
-	prober := obj.(*spec.Prober)
-	log.Printf("Delete: %v", prober)
+	pr := obj.(*spec.Prober)
+	err := p.kubecli.AppsV1beta1().Deployments(pr.Namespace).Delete(pr.Name, cascadeDeleteOptions(0))
+	if err != nil && !apierrors.IsNotFound(err) {
+		// TODO: retry or report failure status in CR
+		panic(err)
+	}
+	err = p.kubecli.CoreV1().Services(pr.Namespace).Delete(pr.Name, nil)
+	if err != nil && !apierrors.IsNotFound(err) {
+		// TODO: retry or report failure status in CR
+		panic(err)
+	}
+}
+
+func cascadeDeleteOptions(gracePeriodSeconds int64) *metav1.DeleteOptions {
+	return &metav1.DeleteOptions{
+		GracePeriodSeconds: func(t int64) *int64 { return &t }(gracePeriodSeconds),
+		PropagationPolicy: func() *metav1.DeletionPropagation {
+			foreground := metav1.DeletePropagationForeground
+			return &foreground
+		}(),
+	}
 }
