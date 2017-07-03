@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	ContainerProbeOutputFilePath = "/var/tmp/containerprobe/result"
+	ContainerProbeDirPath        = "/var/tmp/containerprobe"
+	ContainerProbeOutputFilePath = ContainerProbeDirPath + "/result"
 
 	proberImage = "gcr.io/coreos-k8s-scale-testing/kprober"
 )
@@ -64,15 +65,29 @@ func DeployProber(kubecli kubernetes.Interface, pr *spec.Prober) error {
 	}
 
 	if c := pr.Spec.Probe.Container; c != nil {
+		vn := "sharedResult"
+		shared := v1.Volume{
+			Name: vn,
+			VolumeSource: v1.VolumeSource{
+				EmptyDir: &v1.EmptyDirVolumeSource{},
+			},
+		}
+		vm := v1.VolumeMount{
+			Name:      vn,
+			MountPath: ContainerProbeDirPath,
+			ReadOnly:  false,
+		}
+		podTempl.Spec.Volumes = append(podTempl.Spec.Volumes, shared)
+
 		cp := v1.Container{
-			Name:    "container-probe",
-			Image:   c.Image,
-			Command: []string{"probe > " + ContainerProbeOutputFilePath},
+			Name:         "container-probe",
+			Image:        c.Image,
+			Command:      []string{"probe > " + ContainerProbeOutputFilePath},
+			VolumeMounts: []v1.VolumeMount{vm},
 			// TODO: add IP and Target Env.
 		}
+		podTempl.Spec.Containers[0].VolumeMounts = append(podTempl.Spec.Containers[0].VolumeMounts, vm)
 		podTempl.Spec.Containers = append(podTempl.Spec.Containers, cp)
-		// TODO: mount emptyDir to /var/tmp/containerprobe/ of both prober
-		// and containerProbe containers to share result file between them.
 	}
 
 	d := &appsv1beta1.Deployment{
