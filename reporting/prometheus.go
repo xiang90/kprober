@@ -8,54 +8,55 @@ import (
 
 const (
 	// Probe failure
-	StateUnknown = State(-2)
+	StateUnknown = State("Unknown")
 	// Not reachable
-	StateDown = State(-1)
+	StateDown = State("Down")
 	// Everything is OK
-	StateHealthy = State(0)
+	StateHealthy = State("Healthy")
 	// Something is wrong
-	StateDegraded = State(1)
+	StateDegraded = State("Degraded")
 )
 
-type State int
+type State string
 
 type PrometheusReporter struct {
-	stateGauge   prometheus.Gauge
+	probeCounter *prometheus.CounterVec
 	errorCounter *prometheus.CounterVec
 }
 
 func (pr *PrometheusReporter) ReportState(s State, reason string) {
-	pr.stateGauge.Set(float64(s))
+	pr.probeCounter.With(prometheus.Labels{"state": string(s)}).Inc()
 	if len(reason) != 0 {
 		pr.errorCounter.With(prometheus.Labels{"reason": reason}).Inc()
 	}
 }
 
 func NewPrometheus(proberName string) *PrometheusReporter {
-	sg := prometheus.NewGauge(
-		prometheus.GaugeOpts{
+	pc := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
 			Namespace: "kprober",
 			Subsystem: strings.Replace(proberName, "-", "_", -1),
-			Name:      "state",
-			Help:      "The state of the prober.",
+			Name:      "probe_counter",
+			Help:      "Total number of probes",
 		},
+		[]string{"state"},
 	)
 
 	errors := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: "kprober",
 			Subsystem: strings.Replace(proberName, "-", "_", -1),
-			Name:      "error",
-			Help:      "The state of the prober.",
+			Name:      "error_counter",
+			Help:      "Total number of probe errors",
 		},
 		[]string{"reason"},
 	)
 
-	prometheus.MustRegister(sg)
+	prometheus.MustRegister(pc)
 	prometheus.MustRegister(errors)
 
 	return &PrometheusReporter{
-		stateGauge:   sg,
+		probeCounter: pc,
 		errorCounter: errors,
 	}
 }
