@@ -11,7 +11,7 @@ var (
 	AddToScheme   = SchemeBuilder.AddToScheme
 )
 
-const GroupName = "monitoring.coreos.com"
+const GroupName = "probing.coreos.com"
 
 // SchemeGroupVersion is the group version used to register these objects.
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}

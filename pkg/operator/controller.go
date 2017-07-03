@@ -5,16 +5,11 @@ import (
 	"log"
 
 	"github.com/xiang90/kprober/pkg/spec"
+	"github.com/xiang90/kprober/pkg/util/k8sutil"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/client-go/pkg/api/v1"
-	appsv1beta1 "k8s.io/client-go/pkg/apis/apps/v1beta1"
 	"k8s.io/client-go/tools/cache"
 )
-
-const proberImage = "gcr.io/coreos-k8s-scale-testing/kprober"
 
 func (p *Probers) run(ctx context.Context) {
 	source := cache.NewListWatchFromClient(
@@ -44,62 +39,8 @@ func (p *Probers) run(ctx context.Context) {
 
 func (p *Probers) onAdd(obj interface{}) {
 	pr := obj.(*spec.Prober)
-
-	selector := map[string]string{"app": "prober", "prober": pr.Name}
-
-	podTempl := v1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   pr.Name,
-			Labels: selector,
-		},
-		Spec: v1.PodSpec{
-			Containers: []v1.Container{{
-				Name:  "prober",
-				Image: proberImage,
-				Command: []string{
-					"prober",
-					"-n=" + pr.Name,
-					"-ns=" + pr.Namespace,
-				},
-			}},
-		},
-	}
-
-	d := &appsv1beta1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   pr.Name,
-			Labels: map[string]string{"prober": pr.Name},
-		},
-		Spec: appsv1beta1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{MatchLabels: selector},
-			Template: podTempl,
-			Strategy: appsv1beta1.DeploymentStrategy{
-				Type: appsv1beta1.RecreateDeploymentStrategyType,
-			},
-		},
-	}
-	_, err := p.kubecli.AppsV1beta1().Deployments(pr.Namespace).Create(d)
-	if err != nil && !apierrors.IsAlreadyExists(err) {
-		// TODO: retry or report failure status in CR
-		panic(err)
-	}
-
-	svc := &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   pr.Name,
-			Labels: selector,
-		},
-		Spec: v1.ServiceSpec{
-			Selector: selector,
-			Ports: []v1.ServicePort{{
-				Name: "metrics",
-				Port: 17783,
-			}},
-		},
-	}
-
-	_, err = p.kubecli.CoreV1().Services(pr.Namespace).Create(svc)
-	if err != nil && !apierrors.IsAlreadyExists(err) {
+	err := k8sutil.DeployProber(p.kubecli, pr)
+	if err != nil {
 		// TODO: retry or report failure status in CR
 		panic(err)
 	}
@@ -113,24 +54,9 @@ func (p *Probers) onUpdate(oldObj, newObj interface{}) {
 
 func (p *Probers) onDelete(obj interface{}) {
 	pr := obj.(*spec.Prober)
-	err := p.kubecli.AppsV1beta1().Deployments(pr.Namespace).Delete(pr.Name, cascadeDeleteOptions(0))
-	if err != nil && !apierrors.IsNotFound(err) {
+	err := k8sutil.DeleteProber(p.kubecli, pr.Namespace, pr.Name)
+	if err != nil {
 		// TODO: retry or report failure status in CR
 		panic(err)
-	}
-	err = p.kubecli.CoreV1().Services(pr.Namespace).Delete(pr.Name, nil)
-	if err != nil && !apierrors.IsNotFound(err) {
-		// TODO: retry or report failure status in CR
-		panic(err)
-	}
-}
-
-func cascadeDeleteOptions(gracePeriodSeconds int64) *metav1.DeleteOptions {
-	return &metav1.DeleteOptions{
-		GracePeriodSeconds: func(t int64) *int64 { return &t }(gracePeriodSeconds),
-		PropagationPolicy: func() *metav1.DeletionPropagation {
-			foreground := metav1.DeletePropagationForeground
-			return &foreground
-		}(),
 	}
 }
