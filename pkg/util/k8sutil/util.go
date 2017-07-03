@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	ContainerProbeOutputFilePath = "/tmp/containerprobe/result"
+	ContainerProbeOutputFilePath = "/var/tmp/containerprobe/result"
 
 	proberImage = "gcr.io/coreos-k8s-scale-testing/kprober"
 )
@@ -61,6 +61,18 @@ func DeployProber(kubecli kubernetes.Interface, pr *spec.Prober) error {
 				},
 			}},
 		},
+	}
+
+	if c := pr.Spec.Probe.Container; c != nil {
+		cp := v1.Container{
+			Name:    "container-probe",
+			Image:   c.Image,
+			Command: []string{"probe > " + ContainerProbeOutputFilePath},
+			// TODO: add IP and Target Env.
+		}
+		podTempl.Spec.Containers = append(podTempl.Spec.Containers, cp)
+		// TODO: mount emptyDir to /var/tmp/containerprobe/ of both prober
+		// and containerProbe containers to share result file between them.
 	}
 
 	d := &appsv1beta1.Deployment{
