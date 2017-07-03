@@ -46,8 +46,9 @@ type ServiceTarget struct {
 
 // Only one of the field should be set.
 type Probe struct {
-	HTTP *HTTPProbe `json:"http,omitempty"`
-	Ping *PingProbe `json:"ping,omitempty"`
+	HTTP      *HTTPProbe      `json:"http,omitempty"`
+	Ping      *PingProbe      `json:"ping,omitempty"`
+	Container *ContainerProbe `json:"container,omitempty"`
 }
 
 type HTTPProbe struct {
