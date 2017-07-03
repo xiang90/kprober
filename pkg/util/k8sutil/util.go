@@ -4,14 +4,21 @@ import (
 	"net"
 	"os"
 
+	"github.com/xiang90/kprober/pkg/spec"
+
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/pkg/api/v1"
+	appsv1beta1 "k8s.io/client-go/pkg/apis/apps/v1beta1"
 	"k8s.io/client-go/rest"
 )
 
 const (
 	ContainerProbeOutputFilePath = "/tmp/containerprobe/result"
+
+	proberImage = "gcr.io/coreos-k8s-scale-testing/kprober"
 )
 
 func IPFromPod(ns, podname string) (string, error) {
@@ -35,7 +42,63 @@ func IPsFromDeployments() []string {
 	return nil
 }
 
-func DeployProber() error {
+func DeployProber(kubecli kubernetes.Interface, pr *spec.Prober) error {
+	selector := map[string]string{"app": "prober", "prober": pr.Name}
+
+	podTempl := v1.PodTemplateSpec{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   pr.Name,
+			Labels: selector,
+		},
+		Spec: v1.PodSpec{
+			Containers: []v1.Container{{
+				Name:  "prober",
+				Image: proberImage,
+				Command: []string{
+					"prober",
+					"-n=" + pr.Name,
+					"-ns=" + pr.Namespace,
+				},
+			}},
+		},
+	}
+
+	d := &appsv1beta1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   pr.Name,
+			Labels: selector,
+		},
+		Spec: appsv1beta1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{MatchLabels: selector},
+			Template: podTempl,
+			Strategy: appsv1beta1.DeploymentStrategy{
+				Type: appsv1beta1.RecreateDeploymentStrategyType,
+			},
+		},
+	}
+	_, err := kubecli.AppsV1beta1().Deployments(pr.Namespace).Create(d)
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		return err
+	}
+
+	svc := &v1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   pr.Name,
+			Labels: selector,
+		},
+		Spec: v1.ServiceSpec{
+			Selector: selector,
+			Ports: []v1.ServicePort{{
+				Name: "metrics",
+				Port: 17783,
+			}},
+		},
+	}
+
+	_, err = kubecli.CoreV1().Services(pr.Namespace).Create(svc)
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		return err
+	}
 	return nil
 }
 
@@ -43,8 +106,26 @@ func UpdateProber() error {
 	return nil
 }
 
-func DeleteProber() error {
+func DeleteProber(kubecli kubernetes.Interface, ns, name string) error {
+	err := kubecli.AppsV1beta1().Deployments(ns).Delete(name, cascadeDeleteOptions(0))
+	if err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
+	err = kubecli.CoreV1().Services(ns).Delete(name, nil)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
 	return nil
+}
+
+func cascadeDeleteOptions(gracePeriodSeconds int64) *metav1.DeleteOptions {
+	return &metav1.DeleteOptions{
+		GracePeriodSeconds: func(t int64) *int64 { return &t }(gracePeriodSeconds),
+		PropagationPolicy: func() *metav1.DeletionPropagation {
+			foreground := metav1.DeletePropagationForeground
+			return &foreground
+		}(),
+	}
 }
 
 func MustNewKubeClient() kubernetes.Interface {
