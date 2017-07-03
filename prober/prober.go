@@ -3,10 +3,12 @@ package prober
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/xiang90/kprober/pkg/spec"
 	"github.com/xiang90/kprober/pkg/util/k8sutil"
+	"github.com/xiang90/kprober/probecontainer"
 	"github.com/xiang90/kprober/probehttp"
 	"github.com/xiang90/kprober/probeping"
 	"github.com/xiang90/kprober/reporting"
@@ -61,6 +63,16 @@ func (p *Prober) Start(ctx context.Context) {
 		pp := &probeping.Probe{
 			Addr:     ip,
 			Interval: time.Duration(ps.Ping.PeriodSeconds) * time.Second,
+		}
+		go pp.Start(context.TODO())
+		probe = pp
+	case ps.Container != nil:
+		outf, err := os.Open(k8sutil.ContainerProbeOutputFilePath)
+		if err != nil {
+			panic(err)
+		}
+		pp := &probecontainer.Probe{
+			ResultReader: outf,
 		}
 		go pp.Start(context.TODO())
 		probe = pp

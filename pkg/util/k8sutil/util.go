@@ -10,6 +10,10 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+const (
+	ContainerProbeOutputFilePath = "/tmp/containerprobe/result"
+)
+
 func IPFromPod(ns, podname string) (string, error) {
 	return "", nil
 }
